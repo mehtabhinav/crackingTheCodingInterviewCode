@@ -1,37 +1,15 @@
-
-/*
-  Notes:
-  1) Create an IAM user(StageProject for this project) on the IAM USer management console.
-  2) For working with a dynamodb use the region and the endpoint of your table.
-*/
-
-var express = require('express');
 var AWS = require('aws-sdk');
+var express = require('express');
+var Index = require('./src/index');
+
+AWS.config.update({region: "us-west-1",endpoint: "https://dynamodb.us-west-1.amazonaws.com"});
 
 var app = express();
-
-AWS.config.update({
-  region: "us-west-1",
-  endpoint: "https://dynamodb.us-west-1.amazonaws.com"
-});
-
 var docClient = new AWS.DynamoDB.DocumentClient();
 
-app.get('/addName/:name',function(req, res) {
-  var params = {
-    TableName: "Names",
-    Item:{
-      "names": req.params.name
-    }
-  }
+app.get('/ping', Index.ping);
+app.get('/index', Index.summaryIndex);
+app.get('/code/:sec/:ques', Index.sort);
 
-  docClient.put(params, function(err, data) {
-    if (err) {
-      res.send('Error: '+err);
-    }
-    else {
-      res.send("Added item:");
-    }
-  });
-});
+app.set('json spaces', 2);
 app.listen(3000);
